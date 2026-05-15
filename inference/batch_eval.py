@@ -1,5 +1,5 @@
 """
-demo_eval.py — Batch Evaluation for Visual Product Search
+batch_eval.py — Batch Evaluation for Visual Product Search
 ==========================================================
 Computes Recall@K, NDCG@K, mAP@K (K ∈ {5, 10, 15}) using the best model.
 
@@ -8,14 +8,14 @@ Expected layout
 models/
   clip_seed106.pt        ← fine-tuned CLIP checkpoint (best seed)
   yolo_best.pt           ← fine-tuned YOLO weights
+  captions_cache.json   ← BLIP-2 captions for gallery items
 
 Usage
 -----
-python demo_eval.py \
+python batch_eval.py \
   --query_dir   /path/to/query_images \
   --gallery_dir /path/to/gallery_images \
   --labels      labels.csv \
-  [--captions   captions_cache.json] \
   [--output     results.json]
 
 labels.csv format (no header needed):
@@ -210,6 +210,9 @@ def itm_rerank(query_crop, cands, meta, captions, itm_proc, itm_model, device):
 
 
 # ── Metrics ──────────────────────────────────────────────────────────────────
+def hit_at_k(ret, rel_id, k, nr=None):
+    return 1.0 if rel_id in ret[:k] else 0.0
+
 def recall_at_k(ret, rel_id, k, nr):
     return sum(1 for r in ret[:k] if r == rel_id) / nr if nr else 0.0
 
@@ -229,7 +232,7 @@ def map_at_k(ret, rel_id, k, nr):
 def run_eval(query_entries, idx, meta, gallery_item_counts,
              yolo, clip_model, preprocess, device,
              itm_proc, itm_model, captions):
-    scores = {k: {"recall": [], "ndcg": [], "map": []} for k in K_VALUES}
+    scores = {k: {"hitrate": [], "recall": [], "ndcg": [], "map": []} for k in K_VALUES}
     fetch_k = max(RERANK_K, max(K_VALUES))
 
     for abs_path, rel_path, item_id in tqdm(query_entries, desc="[Eval]"):
@@ -241,6 +244,7 @@ def run_eval(query_entries, idx, meta, gallery_item_counts,
             ret  = [meta[l]["item_id"] for l in rl]
             nr   = gallery_item_counts.get(item_id, 1)
             for k in K_VALUES:
+                scores[k]["hitrate"].append(hit_at_k(  ret, item_id, k))
                 scores[k]["recall"].append(recall_at_k(ret, item_id, k, nr))
                 scores[k]["ndcg"].append(  ndcg_at_k(  ret, item_id, k, nr))
                 scores[k]["map"].append(   map_at_k(   ret, item_id, k, nr))
@@ -257,11 +261,11 @@ def print_report(scores):
     print("="*w)
     print(f"{'':12}" + "".join(f"  K={k:<5}" for k in K_VALUES))
     print("-"*w)
-    for m, label in [("recall","Recall@K"), ("ndcg","NDCG@K"), ("map","mAP@K")]:
+    for m, label in [("hitrate","HitRate@K"), ("recall","Recall@K"), ("ndcg","NDCG@K"), ("map","mAP@K")]:
         row = f"{label:<12}" + "".join(f"  {np.mean(scores[k][m]):.4f}" for k in K_VALUES)
         print(row)
     print("="*w)
-    for m, label in [("recall","Recall@K"), ("ndcg","NDCG@K"), ("map","mAP@K")]:
+    for m, label in [("hitrate","HitRate@K"), ("recall","Recall@K"), ("ndcg","NDCG@K"), ("map","mAP@K")]:
         print(f"\n  {label}")
         for k in K_VALUES:
             v = scores[k][m]
