@@ -18,11 +18,16 @@ pip install streamlit torch torchvision Pillow ultralytics open_clip_torch trans
 
 ## 📥 Downloading Models & Data
 
-All required models, pre-computed HNSW indexes, and the dataset are hosted on Hugging Face. Download everything into the `Demo Application/` folder using the Hugging Face CLI:
+The required models and pre-computed HNSW indexes are hosted on Hugging Face, while the high-resolution image dataset is hosted on Kaggle.
 
+**1. Download the Models:**
+Download the model checkpoints and indexes into the `Demo Application/` folder using the Hugging Face CLI:
 ```bash
 hf download sartma/demo_app_dataset --local-dir .
 ```
+
+**2. Download the Dataset:**
+Download the gallery images from Kaggle: [sartma/deepfashion-inshop](https://www.kaggle.com/datasets/sartma/deepfashion-inshop/data). Extract the zip file into a `datasets/` directory inside this folder.
 
 ## 📂 Directory Layout
 
@@ -59,7 +64,7 @@ Once the app is running, use the **Sidebar** to configure the application.
 
 > [!IMPORTANT]
 > **Dataset Image Root is Required**
-> In order for the application to display the gallery images in the search results, you **must** provide the correct path to the dataset in the sidebar's "Dataset image root" field. Because you downloaded the dataset from Hugging Face, simply enter `datasets/deepfashion-inshop/img/img` into the text box!
+> In order for the application to display the gallery images in the search results, you **must** provide the correct path to the extracted Kaggle dataset in the sidebar's "Dataset image root" field. Assuming you extracted it as shown above, enter `datasets/deepfashion-inshop/img/img` into the text box!
 
 Additionally, you can:
 1. Select your Model Configuration (e.g., `C α=0.7 (best)`).
