@@ -16,22 +16,32 @@ Make sure you have installed the required libraries. If you haven't already, ins
 pip install streamlit torch torchvision Pillow ultralytics open_clip_torch transformers hnswlib pandas numpy
 ```
 
+## 📥 Downloading Models & Data
+
+All required models, pre-computed HNSW indexes, and the dataset are hosted on Hugging Face. Download everything into the `Demo Application/` folder using the Hugging Face CLI:
+
+```bash
+hf download sartma/demo_app_dataset --local-dir .
+```
+
 ## 📂 Directory Layout
 
-Before running the application, ensure your models and pre-computed HNSW indexes are placed correctly. The application expects the YOLO weights (`best.pt`) in the root folder, and all other checkpoints in a `checkpoints2/` directory:
+After downloading, your directory should look like this:
 
 ```text
 Demo Application/
 ├── app.py
 ├── best.pt                       <-- Fine-tuned YOLO object detection weights
-└── checkpoints2/                 <-- All other models and indexes
-    ├── captions_cache.json
-    ├── clip_seed14.pt            <-- Seed 14 CLIP model
-    ├── clip_seed37.pt            <-- Seed 37 CLIP model
-    ├── clip_seed106.pt           <-- Seed 106 CLIP model
-    ├── meta_A_a1.0.json          <-- Metadata for index
-    ├── hnsw_A_a1.0.index         <-- HNSW pre-computed index
-    └── ... (other indexes and metadata files)
+├── checkpoints2/                 <-- All other models and indexes
+│   ├── captions_cache.json
+│   ├── clip_seed14.pt            
+│   ├── meta_A_a1.0.json          
+│   ├── hnsw_A_a1.0.index         
+│   └── ... 
+└── datasets/                     <-- Downloaded gallery images
+    └── deepfashion-inshop/
+        └── img/
+            └── img/              <-- This is the "image root"
 ```
 
 ## 🚀 Running the App
@@ -49,7 +59,7 @@ Once the app is running, use the **Sidebar** to configure the application.
 
 > [!IMPORTANT]
 > **Dataset Image Root is Required**
-> In order for the application to actually display the gallery images in the search results, you **must** provide the absolute path to your dataset in the sidebar's "Dataset image root" field (e.g., `/path/to/deepfashion/img`). If you leave this blank, the app will still work, but you will only see blank placeholder boxes instead of the retrieved clothing images!
+> In order for the application to display the gallery images in the search results, you **must** provide the correct path to the dataset in the sidebar's "Dataset image root" field. Because you downloaded the dataset from Hugging Face, simply enter `datasets/deepfashion-inshop/img/img` into the text box!
 
 Additionally, you can:
 1. Select your Model Configuration (e.g., `C α=0.7 (best)`).

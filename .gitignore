@@ -1,2 +1,7 @@
-models/*.pt
-models/*.pt
+*.pt
+*.index
+*.npy
+__pycache__/
+datasets/
+checkpoints2/
+inference/models/*.pt
